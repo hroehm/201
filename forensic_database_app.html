@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forensic Database: Pioneer Profiler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                    },
+                    colors: {
+                        cyber: {
+                            900: '#0a0a0f',
+                            800: '#12121c',
+                            cyan: '#00f0ff',
+                            green: '#39ff14',
+                            red: '#ff003c',
+                            blue: '#0055ff'
+                        }
+                    },
+                    animation: {
+                        'scanline': 'scanline 8s linear infinite',
+                        'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        scanline: {
+                            '0%': { transform: 'translateY(-100%)' },
+                            '100%': { transform: 'translateY(100vh)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0f;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.05), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(57, 255, 20, 0.05), transparent 25%);
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        
+        .glass-panel {
+            background: rgba(18, 18, 28, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+        }
+
+        .neon-border {
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.2);
+            border-color: #00f0ff;
+        }
+
+        .neon-text {
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+        }
+
+        /* Scanline effect */
+        .scanline-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to bottom, transparent 50%, rgba(0, 240, 255, 0.02) 51%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .scanline-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 20px;
+            background: rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            pointer-events: none;
+            z-index: 51;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+    <div class="scanline-overlay"></div>
+    <div class="scanline-bar animate-scanline"></div>
+
+    <div class="w-full max-w-5xl relative z-10">
+        <!-- Header -->
+        <header class="text-center mb-10">
+            <h1 class="text-4xl md:text-6xl font-mono font-bold text-cyber-cyan neon-text tracking-wider uppercase mb-2">
+                Forensic_Database
+            </h1>
+            <p class="text-gray-400 font-mono text-sm md:text-base tracking-widest uppercase">
+                TN Standard // Criminal Justice III // Historical Pioneers
+            </p>
+        </header>
+
+        <!-- View: Welcome -->
+        <div id="view-welcome" class="glass-panel rounded-2xl p-8 md:p-12 text-center max-w-2xl mx-auto transition-opacity duration-500">
+            <div class="w-24 h-24 mx-auto mb-6 rounded-full border-2 border-cyber-cyan flex items-center justify-center neon-border animate-pulse-fast">
+                <svg class="w-12 h-12 text-cyber-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4 font-mono text-white">SYSTEM ACCESS GRANTED</h2>
+            <p class="text-gray-300 mb-8 leading-relaxed">
+                Welcome, Investigator. To master the art of crime scene investigation, you must first understand its origins. 
+                Your mission is to access the dossiers of the six pioneers who revolutionized forensic science in the United States and beyond.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="app.showView('dossier')" class="px-8 py-3 bg-transparent border-2 border-cyber-cyan text-cyber-cyan font-mono font-bold rounded hover:bg-cyber-cyan hover:text-cyber-900 transition-all duration-300 shadow-[0_0_15px_rgba(0,240,255,0.3)] hover:shadow-[0_0_25px_rgba(0,240,255,0.6)]">
+                    ACCESS DOSSIERS
+                </button>
+                <button onclick="app.startFieldTest()" class="px-8 py-3 bg-cyber-cyan text-cyber-900 font-mono font-bold rounded hover:bg-white transition-all duration-300 shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+                    BEGIN FIELD TEST
+                </button>
+            </div>
+        </div>
+
+        <!-- View: Dossier (Learn) -->
+        <div id="view-dossier" class="hidden transition-opacity duration-500">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-mono text-cyber-cyan neon-text">PIONEER_RECORDS</h2>
+                <button onclick="app.showView('welcome')" class="text-sm font-mono text-gray-400 hover:text-white transition-colors">
+                    &lt; RETURN TO MAIN
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dossier-grid">
+                <!-- Cards injected via JS -->
+            </div>
+
+            <div class="mt-10 text-center">
+                <button onclick="app.startFieldTest()" class="px-10 py-4 bg-cyber-cyan text-cyber-900 font-mono font-bold text-lg rounded-lg hover:bg-white hover:scale-105 transition-all duration-300 shadow-[0_0_20px_rgba(0,240,255,0.5)] uppercase tracking-wide">
+                    Initiate Field Test
+                </button>
+            </div>
+        </div>
+
+        <!-- View: Field Test (Quiz) -->
+        <div id="view-quiz" class="hidden transition-opacity duration-500 max-w-3xl mx-auto">
+            <div class="glass-panel rounded-2xl p-6 md:p-10 relative overflow-hidden">
+                <!-- Progress Bar -->
+                <div class="absolute top-0 left-0 w-full h-1 bg-gray-800">
+                    <div id="quiz-progress" class="h-full bg-cyber-cyan shadow-[0_0_10px_rgba(0,240,255,0.8)] transition-all duration-500" style="width: 0%"></div>
+                </div>
+
+                <div class="flex justify-between items-center mb-8 font-mono text-sm border-b border-gray-700 pb-4">
+                    <span class="text-gray-400">STATUS: <span class="text-cyber-green animate-pulse">ACTIVE_INVESTIGATION</span></span>
+                    <span class="text-cyber-cyan">FILE: <span id="question-counter">1/6</span></span>
+                </div>
+
+                <div class="mb-8 min-h-[120px]">
+                    <h3 class="text-xl md:text-2xl font-semibold leading-relaxed" id="quiz-scenario">
+                        <!-- Scenario injected via JS -->
+                    </h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4" id="quiz-options">
+                    <!-- Options injected via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- View: Result -->
+        <div id="view-result" class="hidden transition-opacity duration-500 max-w-2xl mx-auto text-center glass-panel rounded-2xl p-10 relative overflow-hidden">
+            <div id="result-overlay" class="absolute inset-0 bg-cyber-cyan/10 hidden mix-blend-overlay pointer-events-none"></div>
+            
+            <h2 class="text-3xl font-mono font-bold mb-2 uppercase" id="result-title">EVALUATION_COMPLETE</h2>
+            <p class="text-cyber-cyan font-mono text-xl mb-8" id="result-score">Accuracy: 100%</p>
+            
+            <div class="w-32 h-32 mx-auto mb-6 rounded-full border-4 border-gray-700 flex items-center justify-center relative bg-cyber-800" id="badge-container">
+                <!-- SVG Icon changes based on score -->
+                <svg id="badge-icon" class="w-16 h-16 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-2 text-white" id="result-rank">Rank: Rookie</h3>
+            <p class="text-gray-400 mb-8 max-w-md mx-auto" id="result-desc">
+                Keep studying the pioneers to improve your field skills.
+            </p>
+
+            <button onclick="app.resetGame()" class="px-8 py-3 bg-transparent border-2 border-cyber-cyan text-cyber-cyan font-mono font-bold rounded hover:bg-cyber-cyan hover:text-cyber-900 transition-all duration-300">
+                RESTART SYSTEM
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Data for the pioneers based on TN Criminal Justice III standards
+        const pioneers = [
+            {
+                id: 'locard',
+                name: 'Edmond Locard',
+                title: 'The French Sherlock Holmes',
+                focus: 'Trace Evidence',
+                fact: 'Developed Locard\'s Exchange Principle: "Every contact leaves a trace." He established the world\'s first police crime laboratory in France (1910).',
+                icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>',
+                color: 'text-cyber-cyan'
+            },
+            {
+                id: 'orfila',
+                name: 'Mathieu Orfila',
+                title: 'Father of Forensic Toxicology',
+                focus: 'Toxicology',
+                fact: 'Published the first scientific treatise on the detection of poisons and their effects on animals, establishing toxicology as a legitimate scientific endeavor.',
+                icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>',
+                color: 'text-green-400'
+            },
+            {
+                id: 'bertillon',
+                name: 'Alphonse Bertillon',
+                title: 'Creator of Anthropometry',
+                focus: 'Personal Identification',
+                fact: 'Developed the first scientific system of personal identification using body measurements (anthropometry) and standardized the criminal mugshot.',
+                icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path></svg>',
+                color: 'text-purple-400'
+            },
+            {
+                id: 'galton',
+                name: 'Francis Galton',
+                title: 'Pioneer of Dactyloscopy',
+                focus: 'Fingerprints',
+                fact: 'Conducted the first definitive study of fingerprints and their classification. His work mathematically proved the uniqueness of fingerprints.',
+                icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>',
+                color: 'text-blue-400'
+            },
+            {
+                id: 'goddard',
+                name: 'Calvin Goddard',
+                title: 'Father of Ballistics',
+                focus: 'Firearms Analysis',
+                fact: 'Refined the techniques of firearms examination by using the comparison microscope to determine whether a particular gun fired a specific bullet.',
+                icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>',
+                color: 'text-orange-400'
+            },
+            {
+                id: 'bass',
+                name: 'William M. Bass',
+                title: 'Founder of the Body Farm',
+                focus: 'Forensic Anthropology',
+                fact: 'Founded the Forensic Anthropology Center at the University of Tennessee (The "Body Farm") to study human decomposition under various conditions.',
+                icon: '<svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>', /* Using similar skeletal/science icon */
+                color: 'text-red-400'
+            }
+        ];
+
+        // Quiz Scenarios
+        const quizData = [
+            {
+                scenario: "A suspect claims they were never in the victim's vehicle. However, investigators find a single dog hair on the suspect's pants that matches the victim's golden retriever. Whose principle explains this transfer of physical evidence?",
+                answer: "locard"
+            },
+            {
+                scenario: "A wealthy socialite is found dead under suspicious circumstances. The lead detective suspects foul play and requests a chemical analysis of the victim's organs for traces of arsenic. Who is considered the father of the field analyzing these substances?",
+                answer: "orfila"
+            },
+            {
+                scenario: "Before modern technology, a precinct identifies repeat offenders by taking detailed records of their head width, arm span, and the length of their middle finger. Who created this system of anthropometry?",
+                answer: "bertillon"
+            },
+            {
+                scenario: "A defense attorney argues in court that ridge patterns on hands are not unique to individuals. You cite a definitive study on loop, whorl, and arch classifications to mathematically prove them wrong. Whose work are you citing?",
+                answer: "galton"
+            },
+            {
+                scenario: "Two bullets are recovered: one from a crime scene and one test-fired from a suspect's revolver. An investigator places both under a comparison microscope to analyze the striations side-by-side. Whose pioneering work made this procedure standard?",
+                answer: "goddard"
+            },
+            {
+                scenario: "Remains are discovered in a wooded area in East Tennessee. Investigators need to determine the time since death and rely on extensive research regarding human decomposition rates. Who founded the research facility (The Body Farm) that provided this data?",
+                answer: "bass"
+            }
+        ];
+
+        const app = {
+            currentView: 'welcome',
+            currentQuestionIndex: 0,
+            score: 0,
+            shuffledQuestions: [],
+            isProcessingAnswer: false,
+
+            init() {
+                this.renderDossiers();
+                // Ensure initial view is visible
+                document.getElementById('view-welcome').classList.remove('hidden');
+            },
+
+            showView(viewId) {
+                // Hide all views
+                ['welcome', 'dossier', 'quiz', 'result'].forEach(id => {
+                    document.getElementById(`view-${id}`).classList.add('hidden');
+                });
+                
+                // Show requested view
+                const view = document.getElementById(`view-${viewId}`);
+                view.classList.remove('hidden');
+                
+                // Slight animation trigger
+                view.style.opacity = '0';
+                setTimeout(() => {
+                    view.style.opacity = '1';
+                }, 50);
+
+                this.currentView = viewId;
+                window.scrollTo(0, 0);
+            },
+
+            renderDossiers() {
+                const grid = document.getElementById('dossier-grid');
+                grid.innerHTML = pioneers.map(p => `
+                    <div class="glass-panel border border-gray-800 rounded-xl p-6 hover:border-cyber-cyan transition-all duration-300 group hover:shadow-[0_0_20px_rgba(0,240,255,0.15)] hover:-translate-y-1">
+                        <div class="flex items-center gap-4 mb-4 border-b border-gray-800 pb-4">
+                            <div class="${p.color} bg-gray-900 p-3 rounded-lg group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                                ${p.icon}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg text-white">${p.name}</h3>
+                                <p class="text-xs font-mono text-gray-400 uppercase">${p.title}</p>
+                            </div>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-xs font-mono bg-cyber-900 border border-gray-700 px-2 py-1 rounded text-gray-300">
+                                SPECIALTY: ${p.focus}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-400 leading-relaxed mt-4">
+                            ${p.fact}
+                        </p>
+                    </div>
+                `).join('');
+            },
+
+            startFieldTest() {
+                this.score = 0;
+                this.currentQuestionIndex = 0;
+                // Shuffle questions
+                this.shuffledQuestions = [...quizData].sort(() => Math.random() - 0.5);
+                this.loadQuestion();
+                this.showView('quiz');
+            },
+
+            loadQuestion() {
+                this.isProcessingAnswer = false;
+                const q = this.shuffledQuestions[this.currentQuestionIndex];
+                
+                // Update Progress
+                const progress = ((this.currentQuestionIndex) / this.shuffledQuestions.length) * 100;
+                document.getElementById('quiz-progress').style.width = `${progress}%`;
+                document.getElementById('question-counter').textContent = `${this.currentQuestionIndex + 1}/${this.shuffledQuestions.length}`;
+                
+                // Typewriter effect for scenario
+                const scenarioEl = document.getElementById('quiz-scenario');
+                scenarioEl.innerHTML = '';
+                this.typeWriter(scenarioEl, q.scenario, 20);
+
+                // Generate Options (Always show all 6 pioneers in random order)
+                const optionsGrid = document.getElementById('quiz-options');
+                const shuffledPioneers = [...pioneers].sort(() => Math.random() - 0.5);
+                
+                optionsGrid.innerHTML = shuffledPioneers.map(p => `
+                    <button onclick="app.handleAnswer('${p.id}', this)" class="quiz-btn w-full text-left glass-panel border border-gray-700 p-4 rounded-lg hover:border-cyber-cyan hover:bg-cyber-cyan/10 transition-all duration-200 group flex items-center gap-3">
+                        <div class="w-8 h-8 rounded bg-gray-900 flex items-center justify-center font-mono text-gray-500 group-hover:text-cyber-cyan border border-gray-800 group-hover:border-cyber-cyan transition-colors">
+                            >
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-200 group-hover:text-white">${p.name}</div>
+                            <div class="text-xs text-gray-500 font-mono">${p.focus}</div>
+                        </div>
+                    </button>
+                `).join('');
+            },
+
+            typeWriter(element, text, speed) {
+                let i = 0;
+                element.innerHTML = '';
+                function type() {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    }
+                }
+                type();
+            },
+
+            handleAnswer(selectedId, btnElement) {
+                if (this.isProcessingAnswer) return;
+                this.isProcessingAnswer = true;
+
+                const q = this.shuffledQuestions[this.currentQuestionIndex];
+                const isCorrect = selectedId === q.answer;
+
+                const allBtns = document.querySelectorAll('.quiz-btn');
+                allBtns.forEach(btn => btn.disabled = true);
+
+                if (isCorrect) {
+                    this.score++;
+                    btnElement.classList.remove('border-gray-700', 'hover:border-cyber-cyan');
+                    btnElement.classList.add('border-cyber-green', 'bg-cyber-green/20', 'shadow-[0_0_15px_rgba(57,255,20,0.4)]');
+                    btnElement.querySelector('div:first-child').classList.add('text-cyber-green', 'border-cyber-green');
+                } else {
+                    btnElement.classList.remove('border-gray-700', 'hover:border-cyber-cyan');
+                    btnElement.classList.add('border-cyber-red', 'bg-cyber-red/20');
+                    btnElement.querySelector('div:first-child').classList.add('text-cyber-red', 'border-cyber-red');
+                    
+                    // Highlight correct answer
+                    const correctBtn = Array.from(allBtns).find(btn => btn.getAttribute('onclick').includes(q.answer));
+                    if(correctBtn) {
+                        correctBtn.classList.add('border-cyber-green', 'bg-cyber-green/10');
+                    }
+                }
+
+                setTimeout(() => {
+                    this.currentQuestionIndex++;
+                    if (this.currentQuestionIndex < this.shuffledQuestions.length) {
+                        this.loadQuestion();
+                    } else {
+                        this.showResults();
+                    }
+                }, 2000);
+            },
+
+            showResults() {
+                const percentage = Math.round((this.score / this.shuffledQuestions.length) * 100);
+                document.getElementById('quiz-progress').style.width = '100%';
+                
+                setTimeout(() => {
+                    this.showView('result');
+                    
+                    document.getElementById('result-score').textContent = `Match Accuracy: ${percentage}%`;
+                    
+                    const rankEl = document.getElementById('result-rank');
+                    const descEl = document.getElementById('result-desc');
+                    const badgeContainer = document.getElementById('badge-container');
+                    const badgeIcon = document.getElementById('badge-icon');
+                    
+                    // Reset styling
+                    badgeContainer.className = 'w-32 h-32 mx-auto mb-6 rounded-full border-4 flex items-center justify-center relative bg-cyber-800 shadow-[0_0_30px_rgba(0,0,0,0.5)]';
+                    
+                    if (percentage === 100) {
+                        rankEl.textContent = "Rank: Master Forensic Scientist";
+                        rankEl.className = "text-2xl font-bold mb-2 text-cyber-green neon-text";
+                        descEl.textContent = "Flawless analysis. You have a profound understanding of the historical foundations of forensic science.";
+                        badgeContainer.classList.add('border-cyber-green');
+                        badgeIcon.className = "w-16 h-16 text-cyber-green";
+                        badgeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>';
+                    } else if (percentage >= 66) {
+                        rankEl.textContent = "Rank: Lead Investigator";
+                        rankEl.className = "text-2xl font-bold mb-2 text-cyber-cyan neon-text";
+                        descEl.textContent = "Solid field work. You know your pioneers well, but a quick review of the database could make you an expert.";
+                        badgeContainer.classList.add('border-cyber-cyan');
+                        badgeIcon.className = "w-16 h-16 text-cyber-cyan";
+                        badgeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>';
+                    } else {
+                        rankEl.textContent = "Rank: Rookie Cadet";
+                        rankEl.className = "text-2xl font-bold mb-2 text-gray-300";
+                        descEl.textContent = "You need more time in the academy. Return to the dossier files and study the pioneers before your next assignment.";
+                        badgeContainer.classList.add('border-gray-500');
+                        badgeIcon.className = "w-16 h-16 text-gray-400";
+                        badgeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>';
+                    }
+                }, 500);
+            },
+
+            resetGame() {
+                this.showView('welcome');
+            }
+        };
+
+        // Initialize on load
+        window.onload = () => {
+            app.init();
+        };
+    </script>
+</body>
+</html>
